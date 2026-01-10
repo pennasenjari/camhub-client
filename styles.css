@@ -1,0 +1,233 @@
+:root {
+  --bg: #10161d;
+  --bg-accent: #1c2a33;
+  --card: #16222b;
+  --card-border: #2c3b46;
+  --text: #f2f5f7;
+  --muted: #9fb3c8;
+  --accent: #f2b632;
+  --accent-2: #6ee7b7;
+  --danger: #f97316;
+  --offline: #f87171;
+  --stale: #facc15;
+  --online: #34d399;
+ }
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Space Grotesk", "Segoe UI", sans-serif;
+  background: radial-gradient(circle at top left, #1d2731, #0b0f14 45%, #10161d);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.app {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2vw, 2.4rem);
+  letter-spacing: 0.02em;
+}
+
+.token input {
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--card-border);
+  background: var(--card);
+  color: var(--text);
+}
+
+.controls {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(200px, 280px);
+  gap: 16px;
+  align-items: start;
+}
+
+.camera-form {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  gap: 12px;
+  background: var(--card);
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--card-border);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeUp 0.4s ease;
+}
+
+.camera-form input {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  background: #0d141b;
+  color: var(--text);
+}
+
+.camera-form button {
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  color: #1b1200;
+  font-weight: 600;
+  padding: 10px 16px;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.camera-form button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 16px rgba(242, 182, 50, 0.3);
+}
+
+.snapshot {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  animation: fadeUp 0.4s ease 0.1s both;
+}
+
+.snapshot img {
+  max-width: 100%;
+  border-radius: 10px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+}
+
+.tile {
+  background: linear-gradient(160deg, #13202a, #0f151c);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeUp 0.5s ease;
+}
+
+.tile video {
+  width: 100%;
+  border-radius: 12px;
+  background: #050708;
+}
+
+.hint {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.hint.error {
+  color: var(--offline);
+}
+
+.tile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.title {
+  font-weight: 600;
+}
+
+.status {
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.status-online {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--online);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.status-stale {
+  background: rgba(250, 204, 21, 0.15);
+  color: var(--stale);
+  border: 1px solid rgba(250, 204, 21, 0.4);
+}
+
+.status-offline {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--offline);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+}
+
+.tile-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.tile-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.tile-footer button {
+  background: transparent;
+  border: 1px solid var(--card-border);
+  color: var(--text);
+  border-radius: 10px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.tile-footer button.danger {
+  border-color: rgba(248, 113, 113, 0.5);
+  color: var(--offline);
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 900px) {
+  .controls {
+    grid-template-columns: 1fr;
+  }
+
+  .camera-form {
+    grid-template-columns: 1fr;
+  }
+}
