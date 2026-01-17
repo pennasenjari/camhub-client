@@ -1,19 +1,27 @@
 const { useEffect, useMemo, useRef, useState } = React;
 
+const env = window.__CAMHUB_ENV__ || {};
+const apiBase = (env.CAMHUB_API_BASE || "").replace(/\/$/, "");
+
+function buildApiUrl(path) {
+  if (!apiBase) return path;
+  return `${apiBase}${path}`;
+}
+
 function apiClient(token) {
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
 
   return {
     async getConfig() {
-      const res = await fetch("/api/config", { headers });
+      const res = await fetch(buildApiUrl("/api/config"), { headers });
       return res.json();
     },
     async listCameras() {
-      const res = await fetch("/api/cameras", { headers });
+      const res = await fetch(buildApiUrl("/api/cameras"), { headers });
       return res.json();
     },
     async addCamera(payload) {
-      const res = await fetch("/api/cameras", {
+      const res = await fetch(buildApiUrl("/api/cameras"), {
         method: "POST",
         headers: { "Content-Type": "application/json", ...headers },
         body: JSON.stringify(payload)
@@ -21,28 +29,28 @@ function apiClient(token) {
       return res.json();
     },
     async takeSnapshot(id) {
-      const res = await fetch(`/api/snapshots/${id}`, {
+      const res = await fetch(buildApiUrl(`/api/snapshots/${id}`), {
         method: "POST",
         headers
       });
       return res.json();
     },
     async enableCamera(id) {
-      const res = await fetch(`/api/cameras/${id}/enable`, {
+      const res = await fetch(buildApiUrl(`/api/cameras/${id}/enable`), {
         method: "POST",
         headers
       });
       return res.json();
     },
     async disableCamera(id) {
-      const res = await fetch(`/api/cameras/${id}/disable`, {
+      const res = await fetch(buildApiUrl(`/api/cameras/${id}/disable`), {
         method: "POST",
         headers
       });
       return res.json();
     },
     async deleteCamera(id) {
-      const res = await fetch(`/api/cameras/${id}`, {
+      const res = await fetch(buildApiUrl(`/api/cameras/${id}`), {
         method: "DELETE",
         headers
       });

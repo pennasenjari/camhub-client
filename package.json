@@ -1,0 +1,14 @@
+{
+  "name": "camhub-client",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "node scripts/write-env.js && http-server -p 3000 -c-1 .",
+    "dev": "nodemon -e js,css,html,env --watch . --exec \"node scripts/write-env.js && http-server -p 3000 -c-1 .\""
+  },
+  "devDependencies": {
+    "dotenv": "^16.6.1",
+    "http-server": "^14.1.1",
+    "nodemon": "^3.1.11"
+  }
+}
