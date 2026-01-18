@@ -20,14 +20,6 @@ function apiClient(token) {
       const res = await fetch(buildApiUrl("/api/cameras"), { headers });
       return res.json();
     },
-    async addCamera(payload) {
-      const res = await fetch(buildApiUrl("/api/cameras"), {
-        method: "POST",
-        headers: { "Content-Type": "application/json", ...headers },
-        body: JSON.stringify(payload)
-      });
-      return res.json();
-    },
     async takeSnapshot(id) {
       const res = await fetch(buildApiUrl(`/api/snapshots/${id}`), {
         method: "POST",
@@ -182,13 +174,18 @@ function CameraTile({ camera, onSnapshot, onDelete, webrtcBase }) {
 }
 
 function App() {
-  const [token, setToken] = useState(localStorage.getItem("camhub_token") || "");
   const [cameras, setCameras] = useState([]);
-  const [form, setForm] = useState({ name: "", rtspUrl: "" });
-  const [snapshotId, setSnapshotId] = useState(null);
+  const [snapshots, setSnapshots] = useState(() => {
+    try {
+      const stored = localStorage.getItem("camhub_snapshots");
+      return stored ? JSON.parse(stored) : [];
+    } catch {
+      return [];
+    }
+  });
   const [webrtcBase, setWebrtcBase] = useState("");
 
-  const api = useMemo(() => apiClient(token), [token]);
+  const api = useMemo(() => apiClient(""), []);
 
   async function refresh() {
     const data = await api.listCameras();
@@ -205,19 +202,14 @@ function App() {
     return () => clearInterval(timer);
   }, [api]);
 
-  async function handleAdd(e) {
-    e.preventDefault();
-    const data = await api.addCamera({ name: form.name, rtspUrl: form.rtspUrl });
-    if (!data.error) {
-      setForm({ name: "", rtspUrl: "" });
-      refresh();
-    }
-  }
-
   async function handleSnapshot(id) {
     const data = await api.takeSnapshot(id);
-    if (data.ok) {
-      setSnapshotId(id);
+    if (data.ok && data.path) {
+      const url = data.path.startsWith("http") ? data.path : buildApiUrl(data.path);
+      setSnapshots((prev) => [
+        { id, ts: Date.now(), url },
+        ...prev
+      ]);
     }
   }
 
@@ -230,10 +222,13 @@ function App() {
     }
   }
 
-  function saveToken(value) {
-    setToken(value);
-    localStorage.setItem("camhub_token", value);
-  }
+  useEffect(() => {
+    try {
+      localStorage.setItem("camhub_snapshots", JSON.stringify(snapshots));
+    } catch {
+      // ignore storage errors
+    }
+  }, [snapshots]);
 
   return React.createElement(
     "div",
@@ -241,45 +236,7 @@ function App() {
     React.createElement(
       "header",
       { className: "header" },
-      React.createElement("h1", null, "CamHub"),
-      React.createElement(
-        "div",
-        { className: "token" },
-        React.createElement("input", {
-          placeholder: "Auth token (optional)",
-          value: token,
-          onChange: (e) => saveToken(e.target.value)
-        })
-      )
-    ),
-    React.createElement(
-      "section",
-      { className: "controls" },
-      React.createElement(
-        "form",
-        { className: "camera-form", onSubmit: handleAdd },
-        React.createElement("input", {
-          placeholder: "Camera name",
-          value: form.name,
-          onChange: (e) => setForm({ ...form, name: e.target.value })
-        }),
-        React.createElement("input", {
-          placeholder: "RTSP URL",
-          value: form.rtspUrl,
-          onChange: (e) => setForm({ ...form, rtspUrl: e.target.value })
-        }),
-        React.createElement("button", { type: "submit" }, "Add camera")
-      ),
-      snapshotId
-        ? React.createElement(
-            "div",
-            { className: "snapshot" },
-            React.createElement("img", {
-              src: `/snapshots/${snapshotId}.jpg?ts=${Date.now()}`,
-              alt: "Latest snapshot"
-            })
-          )
-        : null
+      React.createElement("h1", null, "CamHub")
     ),
     React.createElement(
       "section",
@@ -293,7 +250,25 @@ function App() {
           webrtcBase
         })
       )
-    )
+    ),
+    snapshots.length
+      ? React.createElement(
+          "section",
+          { className: "controls" },
+          React.createElement(
+            "div",
+            { className: "snapshot-list" },
+            snapshots.map((snapshot) =>
+              React.createElement("img", {
+                key: `${snapshot.id}-${snapshot.ts}`,
+                className: "snapshot",
+                src: `${snapshot.url}?ts=${snapshot.ts}`,
+                alt: `Snapshot ${snapshot.id}`
+              })
+            )
+          )
+        )
+      : null
   );
 }
 
