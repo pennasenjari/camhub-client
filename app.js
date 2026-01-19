@@ -47,6 +47,10 @@ function apiClient(token) {
         headers
       });
       return res.json();
+    },
+    async listMotion(limit = 50) {
+      const res = await fetch(buildApiUrl(`/api/motion?limit=${limit}`), { headers });
+      return res.json();
     }
   };
 }
@@ -122,6 +126,9 @@ function CameraTile({ camera, onSnapshot, onDelete, webrtcBase }) {
   const lastSeen = camera.last_seen
     ? new Date(camera.last_seen).toLocaleTimeString()
     : "-";
+  const lastMotion = camera.last_motion_at
+    ? new Date(camera.last_motion_at).toLocaleTimeString()
+    : "-";
 
   return React.createElement(
     "div",
@@ -168,6 +175,11 @@ function CameraTile({ camera, onSnapshot, onDelete, webrtcBase }) {
         "span",
         { className: "last-seen" },
         `Last seen: ${lastSeen}`
+      ),
+      React.createElement(
+        "span",
+        { className: "last-motion" },
+        `Motion: ${lastMotion}`
       )
     )
   );
@@ -184,6 +196,7 @@ function App() {
     }
   });
   const [webrtcBase, setWebrtcBase] = useState("");
+  const [motionEvents, setMotionEvents] = useState([]);
 
   const api = useMemo(() => apiClient(""), []);
 
@@ -192,14 +205,26 @@ function App() {
     setCameras(data);
   }
 
+  async function refreshMotion() {
+    const data = await api.listMotion(50);
+    if (Array.isArray(data)) {
+      setMotionEvents(data);
+    }
+  }
+
   useEffect(() => {
     api.getConfig().then((cfg) => {
       const fallback = `${window.location.protocol}//${window.location.hostname}:8889`;
       setWebrtcBase(cfg.webrtcBase || fallback);
     });
     refresh();
+    refreshMotion();
     const timer = setInterval(refresh, 5000);
-    return () => clearInterval(timer);
+    const motionTimer = setInterval(refreshMotion, 10000);
+    return () => {
+      clearInterval(timer);
+      clearInterval(motionTimer);
+    };
   }, [api]);
 
   async function handleSnapshot(id) {
@@ -266,6 +291,39 @@ function App() {
                 alt: `Snapshot ${snapshot.id}`
               })
             )
+          )
+        )
+      : null,
+    motionEvents.length
+      ? React.createElement(
+          "section",
+          { className: "motion" },
+          React.createElement("h2", null, "Recent Motion"),
+          React.createElement(
+            "div",
+            { className: "motion-list" },
+            motionEvents.map((event) => {
+              const camera = cameras.find((item) => item.id === event.camera_id);
+              const label = camera ? camera.name : `Camera ${event.camera_id}`;
+              const time = event.ts ? new Date(event.ts).toLocaleTimeString() : "-";
+              return React.createElement(
+                "div",
+                { key: event.id, className: "motion-item" },
+                React.createElement(
+                  "div",
+                  { className: "motion-meta" },
+                  React.createElement("span", { className: "motion-camera" }, label),
+                  React.createElement("span", { className: "motion-time" }, time)
+                ),
+                event.snapshot_path
+                  ? React.createElement("img", {
+                      className: "motion-thumb",
+                      src: buildApiUrl(event.snapshot_path),
+                      alt: `${label} motion`
+                    })
+                  : null
+              );
+            })
           )
         )
       : null

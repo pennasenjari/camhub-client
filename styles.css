@@ -189,6 +189,7 @@ body {
   gap: 12px;
   font-size: 0.85rem;
   color: var(--muted);
+  flex-wrap: wrap;
 }
 
 .tile-actions {
@@ -208,6 +209,58 @@ body {
 .tile-footer button.danger {
   border-color: rgba(248, 113, 113, 0.5);
   color: var(--offline);
+}
+
+.motion {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeUp 0.4s ease;
+}
+
+.motion h2 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.motion-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+}
+
+.motion-item {
+  background: linear-gradient(160deg, #0f1820, #0b1117);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.motion-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--muted);
+}
+
+.motion-camera {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.motion-thumb {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid var(--card-border);
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
 }
 
 @keyframes fadeUp {
